@@ -1,7 +1,7 @@
 //! C Compiler CLI - Compiles C source to x86-64 assembly.
 
 use anyhow::Result;
-use c_compiler::{lex, CodeGen, Parser};
+use c_compiler::{lex, parse, CodeGen};
 use std::env;
 use std::fs;
 use std::path::Path;
@@ -18,19 +18,16 @@ fn main() -> Result<()> {
     let input_path = args.iter().skip(1).find(|a| !a.starts_with('-')).unwrap_or_else(|| &args[1]);
     let source = fs::read_to_string(input_path)?;
 
-    // Lex
-    let tokens = lex(&source).map_err(|e| anyhow::anyhow!("Lex error: {}", e))?;
-
     if debug_tokens {
+        let tokens = lex(&source).map_err(|e| anyhow::anyhow!("Lex error: {}", e))?;
         for (i, t) in tokens.iter().enumerate() {
             println!("{}: {:?}", i, t);
         }
         return Ok(());
     }
 
-    // Parse
-    let mut parser = Parser::new(tokens);
-    let program = parser.parse()?;
+    // Parse (recursive descent)
+    let program = parse(&source)?;
 
     // Codegen
     let mut codegen = CodeGen::new();

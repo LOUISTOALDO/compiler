@@ -3,7 +3,7 @@
 use logos::Logos;
 use std::fmt;
 
-#[derive(Logos, Debug, PartialEq, Clone)]
+#[derive(Logos, Debug, PartialEq, Eq, Hash, Clone)]
 #[logos(skip r"[ \t\n\r]+")]
 #[logos(skip r"//[^\n]*")]
 // Block comments: /* ... */ (greedy - use // for single-line)
@@ -100,6 +100,38 @@ pub fn lex(source: &str) -> Result<Vec<Token>, String> {
         }
     }
     Ok(tokens)
+}
+
+/// Lexer iterator for LALRPOP: yields `(start, Token, end)` for each token.
+/// Yields `None` at EOF. Errors are represented as invalid tokens (lex returns Err).
+pub struct LalrpopLexer<'input> {
+    lexer: logos::Lexer<'input, Token>,
+}
+
+impl<'input> LalrpopLexer<'input> {
+    pub fn new(source: &'input str) -> Self {
+        Self {
+            lexer: Token::lexer(source),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct LexicalError;
+
+impl Iterator for LalrpopLexer<'_> {
+    type Item = Result<(usize, Token, usize), LexicalError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.lexer.next() {
+            Some(Ok(tok)) => {
+                let span = self.lexer.span();
+                Some(Ok((span.start, tok, span.end)))
+            }
+            Some(Err(_)) => Some(Err(LexicalError)),
+            None => None,
+        }
+    }
 }
 
 #[cfg(test)]

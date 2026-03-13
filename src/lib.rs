@@ -1,4 +1,4 @@
-//! C Compiler - Lexer, Parser, and x86-64 Code Generator
+//! C Compiler - Lexer, Recursive Descent Parser, and x86-64 Code Generator
 //!
 //! Supports a subset of C: int, variables, arithmetic, if/while, functions.
 
