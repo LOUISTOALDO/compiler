@@ -14,8 +14,7 @@ A minimal C compiler written in Rust. Compiles a subset of C to x86-64 assembly 
 ## Build & Run
 
 ```bash
-cargo build
-./target/debug/c-compiler examples/simple.c
+cargo run -- examples/simple.c
 ```
 
 Output: `examples/simple.s` (assembly). Assemble with:
@@ -23,6 +22,8 @@ Output: `examples/simple.s` (assembly). Assemble with:
 ```bash
 gcc examples/simple.s -o program && ./program
 ```
+
+Debug: `cargo run -- examples/simple.c --tokens` to dump tokens.
 
 ## Examples
 
