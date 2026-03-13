@@ -54,8 +54,8 @@ impl CodeGen {
         self.emit("  mov rbp, rsp");
 
         // Allocate space for locals (we'll track as we go)
-        // Params: rdi, rsi, rdx, rcx, r8, r9 (first 6)
-        let param_regs = ["rdi", "rsi", "rdx", "rcx", "r8", "r9"];
+        // Params: rdi, rsi, rdx, rcx, r8, r9 (first 6) - store 32-bit int
+        let param_regs = ["edi", "esi", "edx", "ecx", "r8d", "r9d"];
         for (i, param) in func.params.iter().enumerate() {
             if i < 6 {
                 self.emit(&format!("  mov [rbp-{}], {}", 8 * (i + 1), param_regs[i]));
@@ -275,8 +275,8 @@ impl CodeGen {
                 self.emit(&format!("  mov [rbp-{}], eax", off));
             }
             Expr::Call { name, args } => {
-                // System V: rdi, rsi, rdx, rcx, r8, r9
-                let regs = ["rdi", "rsi", "rdx", "rcx", "r8", "r9"];
+                // System V: edi, esi, edx, ecx, r8d, r9d (32-bit int args)
+                let regs = ["edi", "esi", "edx", "ecx", "r8d", "r9d"];
                 for (i, arg) in args.iter().take(6).enumerate() {
                     self.compile_expr(arg);
                     self.emit(&format!("  mov {}, eax", regs[i]));
